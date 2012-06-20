@@ -8,6 +8,7 @@ Finalized and Documented : 06/18/2012
 #include <libgimp/gimpui.h>
 
 // declaring structures and functions
+// This is for the three fields that we have for the GUI via GTK+
 typedef struct
 {
   gint xcord;
@@ -35,6 +36,7 @@ static MyOval vals =
 
 
 // typedef struct that is called when the gimp application initially starts up
+// it contains pointers to 4 essential gimp-plug-in functions that will be called at different times
 GimpPlugInInfo PLUG_IN_INFO =
   {
     NULL,
@@ -43,23 +45,30 @@ GimpPlugInInfo PLUG_IN_INFO =
     run
   };
 // A macro for the main() function of gimp. gimp_main() which has the usual parameters to read from the terminal and PLUG_IN_INFO parameter.
-// this calls in query and run in this case and put in the necsseary parameters.
+// this calls in query and run in this case and put in the necsseary parameters from GIMP.
+/*
+The Macro is calling on this function
+ gimp_main (const GimpPlugInInfo *info, gint argc, gchar *argv[]);
+ */
+
+
 MAIN()
 
 
 // the query function installs the plug-in for the first time and as the plug-in changes
+// the purpose of  the query function is to define the input arguments 
 static void
 query (void)
 {
 
-  // saving in constant memory an array with info on
+  // saving in constant memory what the data I expect from Gimp
   static GimpParamDef args[] =
     {
       {
 
     GIMP_PDB_INT32, // determines the run-mode whether it is interactive or non-interactive
     "run-mode",
-    "RM"       
+    "RM"
       },
       {
     GIMP_PDB_IMAGE, // Input image
@@ -74,25 +83,26 @@ query (void)
     };
 
   gimp_install_procedure (
-              "plug-in-oval",                        // Name of the plug-in
-              "Lovely Oval!",                        // plug-in title
-              "Displays \"An Oval \" in the pane", // description  
-              "the RAMS",           // Author
+              "plug-in-oval", // Name of the plug-in
+              "Lovely Oval!", // plug-in title
+              "Displays \"An Oval \" in the pane", // description
+              "the RAMS", // Author
               "Copyright the RAMS", // Copyright
-              "2012",               // year
-              "_Oval",              // name, we guess
-              "RGB*, GRAY*",        // image types 
-              GIMP_PLUGIN,          // procedure type
+              "2012", // year
+              "_Oval", // name, we guess
+              "RGB*, GRAY*", // image types
+              GIMP_PLUGIN, // procedure type
               G_N_ELEMENTS (args), 0, // int nparams, int nreturn vals,
-              args, NULL);            //GimpParamDef* params,GimpParamDef* return_values
+              args, NULL); //GimpParamDef* params,GimpParamDef* return_values
 
-  gimp_plugin_menu_register ("plug-in-oval",          // the path of where this is installed
+  gimp_plugin_menu_register ("plug-in-oval", // the path of where this is installed
                              "<Image>/Filters/Misc");
 }
 
 
 
-//
+// the run function has four parameters. The first one is getting the name of the function, the second is
+// determining the number of input parameters, the third one is getting the input parameters from gimp-core? 
 static void
 run (const gchar *name,
      gint nparams,
@@ -104,7 +114,7 @@ run (const gchar *name,
   // GimpParam contains PDBArg type and ParamData
   // PDBArg type contains GIMP_PDB_DRAWABLE, GIMP_PDB_COLOR, CHANNEL etc
   // ParamData is a union datastructure of all the different data types such as d_drawable,d_channel, d_image of gint32, gint18 etc
-  static GimpParam values[1];                  // allocating an array for return type
+  static GimpParam values[1]; // allocating an array for return type
   GimpPDBStatusType status = GIMP_PDB_SUCCESS; // we successful connected with the
   GimpRunMode run_mode;
 
@@ -112,15 +122,15 @@ run (const gchar *name,
   gint image;
 
   /* Setting mandatory output values */
-  *nreturn_vals = 1;
-  *return_vals = values;
+  *nreturn_vals = 1;                                   // You are dereferencing and chugging in the value 1
+  *return_vals = values;                               // You are dereferencing and chugging in an array values
 
   values[0].type = GIMP_PDB_STATUS;
   values[0].data.d_status = status;
 
   /* Getting run_mode - we won't display a dialog if
-   * we are in NONINTERACTIVE mode */
-  run_mode = param[0].data.d_int32; // Calling from the GimpParamDef (refers back to the static struct in query
+* we are in NONINTERACTIVE mode */
+  run_mode = param[0].data.d_int32; // Calling from the GimpParamDef (refers back to the static struct in query)
 
 
   //we will get the specified drawable
@@ -141,10 +151,10 @@ run (const gchar *name,
       break;
 
     case GIMP_RUN_NONINTERACTIVE:
-      if (nparams != 4)                             // why is this not 4?
+      if (nparams != 4) // the parameters that we currently have are 3 (run-mode, image, drawable) I think we should have that in the GIMP_RUN_INTERACTIVE too, if we are checking to see whether we have the right number of input parameters
     gimp_get_data ("plug-in-oval", &vals);
      
-      //Display the dialog
+      //Display the dialog- in other words, if the dialog box is not up, display it.
       if (! oval_dialog (drawable))
     return;
       break;
@@ -152,7 +162,7 @@ run (const gchar *name,
     
 
     case GIMP_RUN_WITH_LAST_VALS:
-      //  Get options last values if needed
+      // Get options last values if needed
       gimp_get_data ("plug-in-oval", &vals);
       break;
 
@@ -163,7 +173,7 @@ run (const gchar *name,
   //dumping changes made in PDB, into the GIMP core
 
   modos (drawable, image);
-  gimp_displays_flush();                                                                // update all the changes we have made to the user interface                                                       //
+  gimp_displays_flush(); // update all the changes we have made to the user interface //
  
  
   return;
@@ -199,7 +209,7 @@ oval_dialog (GimpDrawable *drawable)
   GtkWidget *spinbutton3;
   GtkObject *spinbutton_adj;
   GtkWidget *frame_label;
-  gboolean   run;
+  gboolean run;
 
 
   //This function initializes GTK+ with gtk_init() and initializes GDK's image rendering subsystem (GdkRGB) to follow the GIMP main program's colormap allocation/installation policy.
@@ -211,7 +221,7 @@ oval_dialog (GimpDrawable *drawable)
                 gimp_standard_help_func, "plug-in-oval",
 
                 GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                GTK_STOCK_OK,     GTK_RESPONSE_OK,
+                GTK_STOCK_OK, GTK_RESPONSE_OK,
 
                 NULL);
 
@@ -251,7 +261,7 @@ oval_dialog (GimpDrawable *drawable)
   gtk_frame_set_label_widget (GTK_FRAME (frame), frame_label);
   gtk_label_set_use_markup (GTK_LABEL (frame_label), TRUE);
 
-  g_signal_connect (spinbutton_adj, "value_changed",    //Connects a GCallback function to a signal for a particular object. Params are instance, detailed_signal, c_handler, data
+  g_signal_connect (spinbutton_adj, "value_changed", //Connects a GCallback function to a signal for a particular object. Params are instance, detailed_signal, c_handler, data
                     G_CALLBACK (gimp_int_adjustment_update),
                     &vals.xcord);
 
