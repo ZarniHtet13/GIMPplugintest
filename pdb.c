@@ -100,15 +100,21 @@ The * means match zero or more of anything in wildcards. As we learned, we do th
 
 
 
-
+  #ifdef QUERY
  
   gchar **procnames;
   gint nprocs ;
   gimp_procedural_db_query (".*", ".*",".*",".*",".*",".*",".*",&nprocs, &procnames);
   
+  gint i;
+  for (i = 0; i<nprocs; i++)
+  { printf ("%04d: %s\n", i, procnames[i])}
   
+  #endif /*QUERY MACRO*/
   
-  /* gchar *proceduralname;
+  #ifdef INFO
+  
+  gchar *proceduralname;
   gchar *blurb;
   gchar *help;
   gchar *author;
@@ -119,38 +125,16 @@ The * means match zero or more of anything in wildcards. As we learned, we do th
   gint numvalues;
   GimpParamDef *args;
   GimpParamDef *return_valuess;
-  gimp_procedural_db_proc_info ("gimp-image-new", &blurb, &help,&author,&copyright,&date,&proc_type, &num_args, &numvalues, &args, &return_valuess);*/
-  
-
-   gint i;
-   for (i=0; i<nprocs; i++){
-  printf("%04d: %s\n", i, procnames[i]);
-
-  // printf ("Printing out Number of Arguments : %d\n", num_args); 
-
-  /* GimpParam *return_valsss;
-  gint nreturn_valsss;
-  gint32 layer_ID = -1;
-  gint32 drawable_ID;
-  gint offx;
-  gint offy; 
-
-  return_valsss = gimp_run_procedure ("gimp_selection_float",
-				    &nreturn_valsss,
-				    GIMP_PDB_DRAWABLE, drawable_ID,
-				    GIMP_PDB_INT32, offx,
-				    GIMP_PDB_INT32, offy,
-				    GIMP_PDB_END);
-
-  gint i;
-  for (i = 0; i< nreturn_valsss; i++)
-    {
-    printf("%04d : %%\n", i, return_valsss[i]);*/
+  gimp_procedural_db_proc_info ("gimp-image-new", &blurb, &help,&author,&copyright,&date,&proc_type, &num_args, &numvalues, &args, &return_valuess);
+ 
+	
+ 
+  printf ("Printing out Number of Arguments : %d\n", num_args);
+  printf ("Printing out the name of the author : %s\n", author);
+ #endif /*INFO MACRO*/
 
 
 
-
-}
 
 
 }
